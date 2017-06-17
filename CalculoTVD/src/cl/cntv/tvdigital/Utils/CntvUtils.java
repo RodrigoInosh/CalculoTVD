@@ -35,7 +35,7 @@ public class CntvUtils {
 		Archivo kml_archivo = getArchivo(json_kml);
 		Archivo pdf_archivo = getArchivo(json_pdf);
 		ListaArchivos lista_archivos = new ListaArchivos(pdf_archivo, kml_archivo);
-		getFile(json_pdf.getString("binario"));
+//		getFile(json_pdf.getString("binario"));
 		return lista_archivos;
 	}
 	
