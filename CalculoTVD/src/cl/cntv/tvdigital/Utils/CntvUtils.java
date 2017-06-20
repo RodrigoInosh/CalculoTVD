@@ -24,7 +24,14 @@ public class CntvUtils {
 		nombre = data_json.getString("nombre");
 		checksum = data_json.getString("checksum");
 		base64 = data_json.getString("binario");
-		byte[] b = base64.getBytes(StandardCharsets.UTF_8);
+		byte[] b = null;
+		BASE64Decoder decoder = new BASE64Decoder();
+		try {
+			b = decoder.decodeBuffer(base64);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		getFile(base64, nombre);
 
 		Archivo archivo_datos = new Archivo(descripcion, nombre, checksum, b);
 		return archivo_datos;
@@ -35,7 +42,8 @@ public class CntvUtils {
 		Archivo kml_archivo = getArchivo(json_kml);
 		Archivo pdf_archivo = getArchivo(json_pdf);
 		ListaArchivos lista_archivos = new ListaArchivos(pdf_archivo, kml_archivo);
-//		getFile(json_pdf.getString("binario"));
+
+//		getFile(json_pdf.getString("binario"), json_pdf.getString("nombre"));
 		return lista_archivos;
 	}
 	
@@ -57,18 +65,21 @@ public class CntvUtils {
 	    }
 	}
 	
-	public static FileOutputStream getFile(String base64) {
+	public static FileOutputStream getFile(String base64, String nombre) {
+		System.out.println(nombre);
 		BASE64Decoder decoder = new BASE64Decoder();
 		byte[] decodedBytes;
 		FileOutputStream fop = null;
+
 		try {
 			decodedBytes = decoder.decodeBuffer(base64);
-			File file = new File("newfile.pdf");;
+			File file = new File("/Documentos_tecnicos/"+nombre);
+//			File file = new File( "C:\\Users\\rinostroza\\Documents\\pruebas\\"+nombre);
 			fop = new FileOutputStream(file);
 
 			fop.write(decodedBytes);
 			fop.flush();
-			fop.close();
+//			fop.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
