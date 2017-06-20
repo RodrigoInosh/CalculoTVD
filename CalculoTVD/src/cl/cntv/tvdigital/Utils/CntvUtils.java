@@ -13,7 +13,7 @@ import cl.cntv.tvdigital.webservice.ListaArchivos;
 
 public class CntvUtils {
 
-	public static Archivo getArchivo(JSONObject data_json) {
+	public static Archivo getArchivo(JSONObject data_json, int usuario_id) {
 		String descripcion = "";
 		String nombre = "";
 		String checksum = "";
@@ -31,41 +31,42 @@ public class CntvUtils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		getFile(base64, nombre);
+		getFile(base64, nombre, usuario_id);
 
 		Archivo archivo_datos = new Archivo(descripcion, nombre, checksum, b);
 		return archivo_datos;
 	}
 
-	public static ListaArchivos getListaArchivos(JSONObject json_kml, JSONObject json_pdf) {
+	public static ListaArchivos getListaArchivos(JSONObject json_kml, JSONObject json_pdf, int usuario_id) {
 
-		Archivo kml_archivo = getArchivo(json_kml);
-		Archivo pdf_archivo = getArchivo(json_pdf);
+		Archivo kml_archivo = getArchivo(json_kml, usuario_id);
+		Archivo pdf_archivo = getArchivo(json_pdf, usuario_id);
 		ListaArchivos lista_archivos = new ListaArchivos(pdf_archivo, kml_archivo);
 
-//		getFile(json_pdf.getString("binario"), json_pdf.getString("nombre"));
+		// getFile(json_pdf.getString("binario"), json_pdf.getString("nombre"));
 		return lista_archivos;
 	}
-	
+
 	public static String decodedChecksum(String base, String enconde_type) {
-	    try{
-	        MessageDigest digest = MessageDigest.getInstance(enconde_type);
-	        byte[] hash = digest.digest(base.getBytes("UTF-8"));
-	        StringBuffer hexString = new StringBuffer();
+		try {
+			MessageDigest digest = MessageDigest.getInstance(enconde_type);
+			byte[] hash = digest.digest(base.getBytes("UTF-8"));
+			StringBuffer hexString = new StringBuffer();
 
-	        for (int i = 0; i < hash.length; i++) {
-	            String hex = Integer.toHexString(0xff & hash[i]);
-	            if(hex.length() == 1) hexString.append('0');
-	            hexString.append(hex);
-	        }
+			for (int i = 0; i < hash.length; i++) {
+				String hex = Integer.toHexString(0xff & hash[i]);
+				if (hex.length() == 1)
+					hexString.append('0');
+				hexString.append(hex);
+			}
 
-	        return hexString.toString();
-	    } catch(Exception ex){
-	       throw new RuntimeException(ex);
-	    }
+			return hexString.toString();
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
 	}
-	
-	public static FileOutputStream getFile(String base64, String nombre) {
+
+	public static FileOutputStream getFile(String base64, String nombre, int usuario_id) {
 		System.out.println(nombre);
 		BASE64Decoder decoder = new BASE64Decoder();
 		byte[] decodedBytes;
@@ -73,18 +74,23 @@ public class CntvUtils {
 
 		try {
 			decodedBytes = decoder.decodeBuffer(base64);
-			File file = new File("/Documentos_tecnicos/"+nombre);
-//			File file = new File( "C:\\Users\\rinostroza\\Documents\\pruebas\\"+nombre);
+			File file_folder = new File("/Documentos_tecnicos/Originales/" + usuario_id);
+			if (!file_folder.exists()) {
+				file_folder.mkdirs();
+			}
+			File file = new File("/Documentos_tecnicos/Originales/" + usuario_id + "/" + nombre);
+			// File file = new File(
+			// "C:\\Users\\rinostroza\\Documents\\pruebas\\"+nombre);
 			fop = new FileOutputStream(file);
 
 			fop.write(decodedBytes);
 			fop.flush();
-//			fop.close();
+			 fop.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return fop;
 	}
 }
