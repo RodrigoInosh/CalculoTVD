@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 import org.json.JSONObject;
@@ -18,12 +21,12 @@ public class CntvUtils {
 		String nombre = "";
 		String checksum = "";
 		String base64 = "";
-		System.out.println("Descripcion");
-		System.out.println(data_json.get("descripcion"));
+
 		descripcion = data_json.get("descripcion").toString();
 		nombre = data_json.getString("nombre");
 		checksum = data_json.getString("checksum");
 		base64 = data_json.getString("binario");
+
 		byte[] b = null;
 		BASE64Decoder decoder = new BASE64Decoder();
 		try {
@@ -43,7 +46,6 @@ public class CntvUtils {
 		Archivo pdf_archivo = getArchivo(json_pdf, usuario_id);
 		ListaArchivos lista_archivos = new ListaArchivos(pdf_archivo, kml_archivo);
 
-		// getFile(json_pdf.getString("binario"), json_pdf.getString("nombre"));
 		return lista_archivos;
 	}
 
@@ -74,20 +76,28 @@ public class CntvUtils {
 
 		try {
 			decodedBytes = decoder.decodeBuffer(base64);
+
 			File file_folder = new File("/Documentos_tecnicos/Originales/" + usuario_id);
 			if (!file_folder.exists()) {
 				file_folder.mkdirs();
 			}
-			File file = new File("/Documentos_tecnicos/Originales/" + usuario_id + "/" + nombre);
-			// File file = new File(
-			// "C:\\Users\\rinostroza\\Documents\\pruebas\\"+nombre);
-			fop = new FileOutputStream(file);
 
+			Calendar cal = Calendar.getInstance();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss");
+			String formatted = sdf.format(cal.getTime());
+
+			File file_folder_timestamtp = new File("/Documentos_tecnicos/Originales/" + usuario_id + "/" + formatted);
+			if (!file_folder_timestamtp.exists()) {
+				file_folder_timestamtp.mkdirs();
+			}
+
+			File file = new File("/Documentos_tecnicos/Originales/" + usuario_id + "/" + formatted + "/" + nombre);
+
+			fop = new FileOutputStream(file);
 			fop.write(decodedBytes);
 			fop.flush();
-			 fop.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			fop.close();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
